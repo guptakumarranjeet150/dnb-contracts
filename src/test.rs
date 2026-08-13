@@ -27,7 +27,12 @@ fn setup() -> Fixture {
     let contract = env.register(GivingEscrow, ());
     GivingEscrowClient::new(&env, &contract).initialize(&admin, &usdc, &platform);
 
-    Fixture { env, contract, usdc, platform }
+    Fixture {
+        env,
+        contract,
+        usdc,
+        platform,
+    }
 }
 
 fn client<'a>(f: &Fixture) -> GivingEscrowClient<'a> {

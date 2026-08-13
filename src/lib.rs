@@ -97,9 +97,14 @@ impl GivingEscrow {
             return Err(Error::AlreadyInitialized);
         }
         admin.require_auth();
-        env.storage()
-            .instance()
-            .set(&DataKey::Config, &Config { admin, usdc, platform });
+        env.storage().instance().set(
+            &DataKey::Config,
+            &Config {
+                admin,
+                usdc,
+                platform,
+            },
+        );
         env.storage().instance().set(&DataKey::Counter, &0u64);
         Ok(())
     }
@@ -121,12 +126,7 @@ impl GivingEscrow {
         if deadline <= env.ledger().timestamp() {
             return Err(Error::InvalidDeadline);
         }
-        let id: u64 = env
-            .storage()
-            .instance()
-            .get(&DataKey::Counter)
-            .unwrap_or(0)
-            + 1;
+        let id: u64 = env.storage().instance().get(&DataKey::Counter).unwrap_or(0) + 1;
         let campaign = Campaign {
             id,
             kind,
@@ -141,8 +141,10 @@ impl GivingEscrow {
             .persistent()
             .set(&DataKey::Campaign(id), &campaign);
         env.storage().instance().set(&DataKey::Counter, &id);
-        env.events()
-            .publish((symbol_short!("created"), id), (campaign.kind, campaign.goal));
+        env.events().publish(
+            (symbol_short!("created"), id),
+            (campaign.kind, campaign.goal),
+        );
         Ok(id)
     }
 
@@ -260,7 +262,8 @@ impl GivingEscrow {
         let c = Self::get_campaign(env.clone(), campaign_id)?;
 
         let expired = env.ledger().timestamp() >= c.deadline;
-        let failed_open = c.status == Status::Active && expired && (c.raised < c.goal || !c.approved);
+        let failed_open =
+            c.status == Status::Active && expired && (c.raised < c.goal || !c.approved);
         let cancelled = c.status == Status::Cancelled;
         if !(failed_open || cancelled) {
             return Err(Error::RefundNotAllowed);

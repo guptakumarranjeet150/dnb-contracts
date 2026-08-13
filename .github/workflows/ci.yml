@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+env:
+  # Respect Cargo.lock (pins ed25519-dalek 2.2.0; 3.0.0 breaks Soroban's test host).
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: fmt · clippy · test · wasm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (stable) + wasm target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: wasm32v1-none
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Format check
+        run: cargo fmt --all --check
+
+      - name: Clippy (deny warnings)
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Unit tests
+        run: cargo test --locked
+
+      - name: Build deployable wasm
+        run: cargo build --locked --target wasm32v1-none --release

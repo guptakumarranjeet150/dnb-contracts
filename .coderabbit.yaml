@@ -1,0 +1,31 @@
+# CodeRabbit configuration — https://docs.coderabbit.ai/reference/yaml-template
+# Requires the CodeRabbit GitHub App to be installed on the Deen-Bridge org/repo.
+language: en-US
+early_access: false
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+      - dev
+  path_instructions:
+    - path: "src/**/*.rs"
+      instructions: >-
+        This is a Soroban (Rust) smart contract handling escrowed USDC. Prioritize:
+        (1) authorization — every state-changing entrypoint must require the correct
+        signer (donor/platform/admin) via require_auth; (2) NO admin/platform custody
+        path — funds may only move to the organizer (release) or back to the donor
+        (refund); (3) integer overflow/underflow on i128 balances; (4) state-machine
+        invariants (Active/Released/Cancelled, approved gate, goal/deadline checks);
+        (5) refund idempotency; (6) persistent-storage TTL. Flag any deviation.
+    - path: ".github/workflows/**"
+      instructions: >-
+        Ensure cargo commands use --locked so the ed25519-dalek 2.2.0 pin is honored.
+chat:
+  auto_reply: true
