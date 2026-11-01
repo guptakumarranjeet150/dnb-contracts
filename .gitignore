@@ -2,6 +2,7 @@
 test_snapshots
 **/*.rs.bk
 .DS_Store
-.env
 .soroban
 .stellar
+config.bat
+node_modules
